@@ -1,13 +1,180 @@
+"use client";
 import Header from "@/components/Header.js";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [productform, setProductform] = useState({slug:"",quantity:0,price:""});
+  const [products, setProducts] = useState()
+  const [dropdown, setDropdown] = useState([])
+
+  const addproduct = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/mongo", {
+        method: 'POST',
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(productform),
+      });
+      if(response.ok){
+        alert('product added')
+        setProductform({slug:"",quantity:0,price:""})
+      }
+    } catch (error) {
+      console.log(error.message)
+    }
+  };
+  const handlechange = async (e) => {
+    setProductform({ ...productform, [e.target.name]: [e.target.value] });
+  };
+
+  useEffect(() => {
+    const getproducts = async () => {
+      try {
+        const response = await fetch("/api/mongo", {
+          method: 'GET',
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(productform),
+        });
+        if(response.ok){
+          alert('got products')
+          setProducts(response.json)
+        }
+      } catch (error) {
+        console.log(error.message)
+      }
+    };
+    getproducts;
+  }, [])
+  
+  
+
   return (
     <>
-    <Header />
-    <div className="container mx-auto bg-red-50">
-      <h1>Add a Product</h1>
-      <h1>Display Current Stock</h1>
-    </div>
+      <Header />
+      <div className="container mx-auto p-8 pt-2">
+        <h1 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-300 pb-4 flex items-center">
+          Search a Product
+          <div className="ml-4 relative flex flex-row gap-4 w-4/5">
+            {/* Dropdown - example with static items */}
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Search for a product..."
+            />
+            <select className="p-2">
+              <option
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                value=""
+              >
+                All
+              </option>
+              <option
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                value="Category A"
+              >
+                Category A
+              </option>
+              <option
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                value="Category B"
+              >
+                Category B
+              </option>
+              {/* Additional items can be dynamically added */}
+            </select>
+          </div>
+        </h1>
+        <h1 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-300 pb-2 p-4">
+          Add a Product
+        </h1>
+        <form className="p-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Product Slug
+            </label>
+            <input
+              type="text"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter product name"
+              onChange={handlechange}
+              name="slug"
+              value={productform.slug}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Quantity
+            </label>
+            <input
+              type="number"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter quantity"
+              onChange={handlechange}
+              name="quantity"
+              value={productform.quantity}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Price
+            </label>
+            <input
+              type="text"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter price"
+              onChange={handlechange}
+              name="price"
+              value={productform.price}
+            />
+          </div>
+          <div className="w-full flex justify-center items-center">
+            <button
+              type="submit"
+              className="w-4/5 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 mx-auto"
+              onClick={addproduct}
+            >
+              Add Product
+            </button>
+          </div>
+        </form>
+
+        {/* Display Current Stock Heading */}
+        <div className="container mx-auto p-4 pt-2 mt-4">
+          <h1 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-300 pb-2">
+            Display Current Stock
+          </h1>
+
+          {/* Stock Table */}
+          <div className="mt-4">
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 border-b">Product Name</th>
+                  <th className="py-2 px-4 border-b">Quantity</th>
+                  <th className="py-2 px-4 border-b">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+              {products && products.map((product)=>{
+              return(
+                <tr key={product.slug}>
+                  <td className="py-2 px-4 border-b">{product.slug}</td>
+                  <td className="py-2 px-4 border-b">{product.quantity}</td>
+                  <td className="py-2 px-4 border-b">₹{product.price}</td>
+                </tr> 
+              )
+              })}   
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
