@@ -3,26 +3,30 @@ import Header from "@/components/Header.js";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [productform, setProductform] = useState({slug:"",quantity:0,price:""});
-  const [products, setProducts] = useState()
-  const [dropdown, setDropdown] = useState([])
+  const [productform, setProductform] = useState({
+    slug: "",
+    quantity: "",
+    price: "",
+  });
+  const [products, setProducts] = useState();
+  const [dropdown, setDropdown] = useState([]);
 
   const addproduct = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch("/api/mongo", {
-        method: 'POST',
+        method: "POST",
         headers: {
           "Content-type": "application/json",
         },
         body: JSON.stringify(productform),
       });
-      if(response.ok){
-        alert('product added')
-        setProductform({slug:"",quantity:0,price:""})
+      if (response.ok) {
+        alert("product added");
+        setProductform({ slug: "", quantity: 0, price: "" });
       }
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
   };
   const handlechange = async (e) => {
@@ -33,38 +37,72 @@ export default function Home() {
     const getproducts = async () => {
       try {
         const response = await fetch("/api/mongo", {
-          method: 'GET',
+          method: "GET",
           headers: {
             "Content-type": "application/json",
           },
           body: JSON.stringify(productform),
         });
-        if(response.ok){
-          alert('got products')
-          setProducts(response.json)
+        if (response.ok) {
+          alert("got products");
+          setProducts(response.json);
         }
       } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
       }
     };
     getproducts;
-  }, [])
-  
-  
+  }, []);
+
+  const editdropdown = async (search) => {
+    try {
+      const response = await fetch("/api/search", {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ slug: search }),
+      });
+      if (response.ok) {
+        alert("got required products");
+        setDropdown(response.json);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <>
       <Header />
       <div className="container mx-auto p-8 pt-2">
-        <h1 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-300 pb-4 flex items-center">
+        <h1 className="text-2xl font-bold text-gray-800 border-gray-300 flex items-center">
           Search a Product
           <div className="ml-4 relative flex flex-row gap-4 w-4/5">
             {/* Dropdown - example with static items */}
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Search for a product..."
-            />
+            <div className="flex w-full h-fit flex-col">
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Search for a product..."
+                onChange={(e) => editdropdown(e.target.value)}
+                onBlur={() => setDropdown({})}
+              />
+              <div className="absolute w-3/5 border rounded bg-purple-100">
+                {dropdown && dropdown.map((item) => {
+                  return (
+                    <div
+                      className="container flex justify-between p-2 my-1 border-gray-600 border-b-2"
+                      key={item.slug}
+                    >
+                      <span className="slug">{item.slug}</span>
+                      <span className="price">{item.price}</span>
+                      <span className="quantity">{item.quantity}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
             <select className="p-2">
               <option
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -136,7 +174,7 @@ export default function Home() {
           <div className="w-full flex justify-center items-center">
             <button
               type="submit"
-              className="w-4/5 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 mx-auto"
+              className="w-1/5 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 mx-auto"
               onClick={addproduct}
             >
               Add Product
@@ -161,15 +199,18 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-              {products && products.map((product)=>{
-              return(
-                <tr key={product.slug}>
-                  <td className="py-2 px-4 border-b">{product.slug}</td>
-                  <td className="py-2 px-4 border-b">{product.quantity}</td>
-                  <td className="py-2 px-4 border-b">₹{product.price}</td>
-                </tr> 
-              )
-              })}   
+                {products &&
+                  products.map((product) => {
+                    return (
+                      <tr key={product.slug}>
+                        <td className="py-2 px-4 border-b">{product.slug}</td>
+                        <td className="py-2 px-4 border-b">
+                          {product.quantity}
+                        </td>
+                        <td className="py-2 px-4 border-b">₹{product.price}</td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
