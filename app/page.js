@@ -24,48 +24,50 @@ export default function Home() {
       if (response.ok) {
         alert("product added");
         setProductform({ slug: "", quantity: 0, price: "" });
+        getproducts();
       }
     } catch (error) {
       console.log(error.message);
     }
   };
   const handlechange = async (e) => {
-    setProductform({ ...productform, [e.target.name]: [e.target.value] });
+    setProductform({ ...productform, [e.target.name]: e.target.value });
   };
 
-  useEffect(() => {
-    const getproducts = async () => {
-      try {
-        const response = await fetch("/api/mongo", {
-          method: "GET",
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify(productform),
-        });
-        if (response.ok) {
-          alert("got products");
-          setProducts(response.json);
-        }
-      } catch (error) {
-        console.log(error.message);
-      }
-    };
-    getproducts;
-  }, []);
-
-  const editdropdown = async (search) => {
+  const getproducts = async () => {
     try {
-      const response = await fetch("/api/search", {
+      const response = await fetch("/api/mongo", {
         method: "GET",
         headers: {
           "Content-type": "application/json",
         },
-        body: JSON.stringify({ slug: search }),
       });
       if (response.ok) {
-        alert("got required products");
-        setDropdown(response.json);
+        const data = await response.json(); // Call json() as a method
+        setProducts(data.allProducts);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  useEffect(() => {
+    getproducts();
+  }, []);
+
+  const editdropdown = async (search) => {
+    try {
+      const response = await fetch(`/api/search?slug=${search}`, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
+      if (response.ok) {
+        const data = await response.json(); 
+        setDropdown(data.allProducts);
+        setTimeout(() => {
+          setDropdown([]); 
+        }, 10000);
       }
     } catch (error) {
       console.log(error.message);
@@ -76,11 +78,11 @@ export default function Home() {
     <>
       <Header />
       <div className="container mx-auto p-8 pt-2">
-        <h1 className="text-2xl font-bold text-gray-800 border-gray-300 flex items-center">
-          Search a Product
+        <div className="text-2xl font-bold text-gray-800 border-gray-300 flex flex-row">
+          <h1 className="whitespace-nowrap mt-2">Search a Product</h1>
           <div className="ml-4 relative flex flex-row gap-4 w-4/5">
             {/* Dropdown - example with static items */}
-            <div className="flex w-full h-fit flex-col">
+            <div className="relative flex w-full h-fit flex-col">
               <input
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
@@ -88,22 +90,23 @@ export default function Home() {
                 onChange={(e) => editdropdown(e.target.value)}
                 onBlur={() => setDropdown({})}
               />
-              <div className="absolute w-3/5 border rounded bg-purple-100">
-                {dropdown && dropdown.map((item) => {
-                  return (
+              {Array.isArray(dropdown) && dropdown.length > 0 && (
+                <div className=" w-full mt-2 border rounded bg-white z-10 h-20 overflow-y-scroll">
+                  {dropdown.map((item) => (
                     <div
-                      className="container flex justify-between p-2 my-1 border-gray-600 border-b-2"
+                      className="flex justify-between p-2 my-1 border-b-2 border-b-slate-300"
                       key={item.slug}
                     >
                       <span className="slug">{item.slug}</span>
                       <span className="price">{item.price}</span>
                       <span className="quantity">{item.quantity}</span>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <select className="p-2">
+
+            <select className="p-2 border border-gray-300 rounded-md shadow-sm h-fit font-medium">
               <option
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 value=""
@@ -125,7 +128,8 @@ export default function Home() {
               {/* Additional items can be dynamically added */}
             </select>
           </div>
-        </h1>
+        </div>
+
         <h1 className="text-2xl font-bold text-gray-800 border-b-2 border-gray-300 pb-2 p-4">
           Add a Product
         </h1>

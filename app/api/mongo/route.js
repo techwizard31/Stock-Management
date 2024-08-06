@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
-const uri =
-  "mongodb+srv://istaprasadpatra:Ista31@cluster0.j3q5e0x.mongodb.net/stock?retryWrites=true&w=majority&appName=Cluster0";
+const uri =process.env.MONGO_URI
 
 // Connect to MongoDB using mongoose
 export async function connectToDatabase() {
@@ -10,13 +9,15 @@ export async function connectToDatabase() {
     await mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    });
+    }
+  );
     console.log("Connected to the database");
   } catch (error) {
     console.error("Database connection error:", error);
     throw error;
   }
 }
+
 
 const Schema = mongoose.Schema;
 const inventorySchema = new Schema({
@@ -35,25 +36,27 @@ const inventorySchema = new Schema({
   },
 });
 
-const Inventory = mongoose.model("Inventory", inventorySchema);
+const Inventory = mongoose.models.Inventory || mongoose.model("Inventory", inventorySchema);
 
 export async function GET(request) {
+  await connectToDatabase();
   try {
     const allProducts = await Inventory.find({});
-    return NextResponse.json({ allProducts });
+    return NextResponse.json({ allProducts },{status:200})
   } catch (error) {
-    return NextResponse.json({ error: error.message });
+    return NextResponse.json({ error: error.message },{status:400})
   }
 }
 
 export async function POST(request) {
+  await connectToDatabase();
   try {
-    const body = await request.json();
-    const product = await Inventory.create(body);
-    console.log(product)
-    return NextResponse.json({ product, ok: true });
+    const data = await request.json();
+    console.log(data)
+    const product = await Inventory.create(data);
+    return NextResponse.json({ product, ok: true },{status:200})
   } catch (error) {
-    return NextResponse.json({ error: error.message });
+    return NextResponse.json({ error: error.message },{status:400})
   }
 }
 
