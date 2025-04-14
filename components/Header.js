@@ -19,12 +19,12 @@ function Header() {
           </svg>
           <span className="ml-3 text-xl">Inventory Management System</span>
         </a>
-        <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
+        {/* <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
           <a className="mr-5 hover:text-gray-900">First Link</a>
           <a className="mr-5 hover:text-gray-900">Second Link</a>
           <a className="mr-5 hover:text-gray-900">Third Link</a>
           <a className="mr-5 hover:text-gray-900">Fourth Link</a>
-        </nav>
+        </nav> */}
       </div>
     </header>
   )

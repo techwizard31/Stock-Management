@@ -106,7 +106,7 @@ export default function Home() {
               )}
             </div>
 
-            <select className="p-2 border border-gray-300 rounded-md shadow-sm h-fit font-medium">
+            {/* <select className="p-2 border border-gray-300 rounded-md shadow-sm h-fit font-medium">
               <option
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 value=""
@@ -125,8 +125,7 @@ export default function Home() {
               >
                 Category B
               </option>
-              {/* Additional items can be dynamically added */}
-            </select>
+            </select> */}
           </div>
         </div>
 
